@@ -14,7 +14,16 @@ func IsValid(v string) bool {
 
 // IsRelease returns true if the version is release version.
 func IsRelease(v string) bool {
-	return scoreRelease(v) >= 60
+	pv := parse(v)
+	if pv.Err != "" {
+		return false
+	}
+
+	if len(pv.Rest) == 0 {
+		return true
+	}
+
+	return isRelease(pv.Rest[0])
 }
 
 // Epoch returns the epoch version without v prefix,
@@ -275,14 +284,14 @@ func compareRest(x, y []string) int {
 	}
 	if len(x) == 0 {
 		// evaluate y
-		if IsRelease(y[0]) {
+		if isRelease(y[0]) {
 			return 0
 		}
 		return +1
 	}
 	if len(y) == 0 {
 		// evaluate x
-		if IsRelease(x[0]) {
+		if isRelease(x[0]) {
 			return 0
 		}
 		return -1
@@ -455,4 +464,8 @@ func isNum(v string) bool {
 		i++
 	}
 	return i == len(v)
+}
+
+func isRelease(v string) bool {
+	return scoreRelease(v) >= 60
 }
